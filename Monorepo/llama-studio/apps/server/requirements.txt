@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+gunicorn
+jinja2
+python-multipart
+llama-cpp-python
+llama-index
+websockets

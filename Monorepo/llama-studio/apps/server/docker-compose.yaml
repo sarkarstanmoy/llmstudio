@@ -1,0 +1,13 @@
+version: '3'
+services:
+  web:
+      image: nginx:latest
+      ports:
+        - 80:3100
+      depends_on:
+        - neullmstudio-back
+  neullmstudio-back:
+    image: neullmstudio.azurecr.io/llama-7b-ggml-api
+    container_name: neullmstudio-back
+    ports:
+        - "3100:3100"

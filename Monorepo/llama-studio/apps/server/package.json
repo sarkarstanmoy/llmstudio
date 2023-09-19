@@ -1,0 +1,19 @@
+{
+  "name": "llama-studio-server",
+  "version": "0.1.0",
+  "description": "Server application for LLM",
+  "keywords": [
+    "python",
+    "fastapi"
+  ],
+  "homepage": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "uvicorn main:app --reload",
+    "build": "",
+    "lint": "echo TODO",
+    "test": "test lib"
+  },
+  "devDependencies": {},
+  "private": true
+}

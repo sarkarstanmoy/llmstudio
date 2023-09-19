@@ -1,0 +1,22 @@
+{
+  "name": "llama-studio-client",
+  "version": "0.1.0",
+  "description": "Client application for LLM",
+  "keywords": [
+    "neudesic",
+    "ios",
+    "android",
+    "flutter",
+    "cli"
+  ],
+  "homepage": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "flutter run -d chrome",
+    "build": "flutter build web",
+    "lint": "echo TODO",
+    "test": "flutter test lib"
+  },
+  "devDependencies": {},
+  "private": true
+}
