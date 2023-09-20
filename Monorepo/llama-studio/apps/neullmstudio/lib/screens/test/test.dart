@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:neu_llm_studio/common/common.dart';
+
 import '../../common/prompt_model.dart';
+import '../../infrastructure/llama_provider.dart';
 
 class Test extends StatefulWidget {
   const Test({super.key});
@@ -13,83 +18,58 @@ class Test extends StatefulWidget {
 
 class _TestState extends State<Test> {
   final List<PromptModel> prompts = <PromptModel>[];
-  final streamController = StreamController();
   var showLoading = false;
-  var showStop = false;
-  var _channel = WebSocketChannel.connect(
-    // Uri.parse('ws://127.0.0.1:8000/chat'),
-    Uri.parse(
-        'wss://llamapubsub.webpubsub.azure.com/client/hubs/myhub1?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ3c3M6Ly9sbGFtYXB1YnN1Yi53ZWJwdWJzdWIuYXp1cmUuY29tL2NsaWVudC9odWJzL0h1YiIsImlhdCI6MTY5NTExMjE2MywiZXhwIjoxNjk1MTE1NzYzfQ.EzK8lOsxIu7-lGQCRwKp5cAj_-s2IGQtuIQSpJCH7Mo'),
-  );
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     final promptController = TextEditingController();
     return Scaffold(
+      appBar: Common().CustomAppBar(),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: ListView.separated(
-                  reverse: true,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(
-                        "Prompt: ${prompts[index].question}",
-                        maxLines: 100,
-                      ),
-                      subtitle:
-                          Text("LLM: ${prompts[index].answer}", maxLines: 100),
-                    );
-                  },
-                  separatorBuilder: (context, index) {
-                    return Divider();
-                  },
-                  itemCount: prompts.length - 1 < 0 ? 0 : prompts.length - 1),
-            ),
-            prompts.isEmpty
-                ? Text("Ask Question?")
-                : StreamBuilder(
-                    stream: _channel.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        prompts.last.answer =
-                            prompts.last.answer + snapshot.data;
-                        streamController.add(prompts.last.answer
-                            .replaceAll("''", "")
-                            .replaceAll("\\n", "\n"));
-                        prompts.last.answer = prompts.last.answer
-                            .replaceAll("''", "")
-                            .replaceAll("\\n", "\n");
-                      }
-                      return Expanded(
-                        child: Center(
-                            child: SingleChildScrollView(
-                                child: ListTile(
-                          title: Text("Prompt: ${prompts.last.question}",
-                              maxLines: 100),
-                          subtitle: Text("LLM: ${prompts.last.answer}",
-                              maxLines: 100),
-                        ))),
+                child: ListView.separated(
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        children: [
+                          RichText(
+                              text: TextSpan(children: [
+                            TextSpan(
+                                text: "Prompt: ",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary)),
+                            TextSpan(
+                                text: prompts[index].question,
+                                style: Theme.of(context).textTheme.labelLarge)
+                          ])),
+                          AnimatedTextKit(
+                            isRepeatingAnimation: false,
+                            stopPauseOnTap: true,
+                            animatedTexts: [
+                              TyperAnimatedText(prompts[index].answer)
+                            ],
+                          )
+                        ],
                       );
                     },
-                  ),
-            showLoading ? const CircularProgressIndicator() : Container(),
-            showStop
-                ? ElevatedButton(
-                    onPressed: () {
-                      _channel.sink.close();
-                    },
-                    child: Text("Stop"))
-                : Container(),
+                    itemCount: prompts.length,
+                    separatorBuilder: (BuildContext context, int index) {
+                      return const Divider();
+                    })),
+            showLoading ? CircularProgressIndicator() : Container(),
             Row(
               children: [
                 IconButton(
                   onPressed: () {
                     setState(() {
                       prompts.clear();
-                      _channel.sink.close();
                     });
                   },
                   icon: const Icon(Icons.refresh),
@@ -101,24 +81,16 @@ class _TestState extends State<Test> {
                     controller: promptController,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (value) async {
-                      if (_channel.closeCode != null) {
-                        _channel = WebSocketChannel.connect(
-                          //Uri.parse('ws://127.0.0.1:8000/chat'),
-                          Uri.parse(
-                              'wss://llamapubsub.webpubsub.azure.com/client/hubs/myhub1?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ3c3M6Ly9sbGFtYXB1YnN1Yi53ZWJwdWJzdWIuYXp1cmUuY29tL2NsaWVudC9odWJzL0h1YiIsImlhdCI6MTY5NTExMjE2MywiZXhwIjoxNjk1MTE1NzYzfQ.EzK8lOsxIu7-lGQCRwKp5cAj_-s2IGQtuIQSpJCH7Mo'),
-                        );
-                      }
                       setState(() {
                         showLoading = true;
                       });
                       var promptModel = PromptModel();
                       promptModel.question = value;
-                      promptModel.answer = "";
-                      _channel.sink.add(value);
+                      var response = await LlamaProvider().getResponse(value);
+                      promptModel.answer = response.response;
                       setState(() {
                         prompts.add(promptModel);
                         showLoading = false;
-                        showStop = true;
                       });
                     },
                     decoration: InputDecoration(
@@ -143,11 +115,5 @@ class _TestState extends State<Test> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _channel.sink.close();
-    super.dispose();
   }
 }

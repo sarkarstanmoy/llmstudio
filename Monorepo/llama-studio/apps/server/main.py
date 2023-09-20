@@ -5,6 +5,10 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from llama_index.llms import LlamaCPP
 from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
+from pydantic import BaseModel
+
+class Prompt(BaseModel):
+    request: str
 
 app = FastAPI()
 
@@ -65,9 +69,9 @@ def read_stream_async(prompt):
     return StreamingResponse(llmResponse(prompt),media_type='text/event-stream')  # type: ignore
 
 
-@app.get("/prompt/{prompt}")
-def read_sync(prompt):
-    return llm.complete(prompt).text; 
+@app.post("/prompt/")
+def read_sync(prompt:Prompt):
+    return llm.complete(prompt.request).text; 
 
 @app.post("/chat/stop")
 def stop():
