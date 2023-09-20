@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:neu_llm_studio/common/common.dart';
 
 import '../../common/prompt_model.dart';
@@ -19,13 +20,22 @@ class Test extends StatefulWidget {
 class _TestState extends State<Test> {
   final List<PromptModel> prompts = <PromptModel>[];
   var showLoading = false;
+  late final _focusNode = FocusNode(
+    onKey: (FocusNode node, RawKeyEvent evt) {
+      if (!evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
+        return KeyEventResult.handled;
+      }
+      else {
+        return KeyEventResult.ignored;
+      }
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     final promptController = TextEditingController();
     return Scaffold(
-      appBar: Common().CustomAppBar(),
       body: SafeArea(
         child: Column(
           children: [
@@ -47,13 +57,19 @@ class _TestState extends State<Test> {
                                             .primary)),
                             TextSpan(
                                 text: prompts[index].question,
-                                style: Theme.of(context).textTheme.labelLarge)
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary))
                           ])),
                           AnimatedTextKit(
                             isRepeatingAnimation: false,
                             stopPauseOnTap: true,
                             animatedTexts: [
-                              TyperAnimatedText(prompts[index].answer)
+                              TyperAnimatedText(prompts[index].answer,textStyle: TextStyle(color: Colors.green))
                             ],
                           )
                         ],
@@ -78,6 +94,8 @@ class _TestState extends State<Test> {
                     child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
+                    focusNode: _focusNode,
+                    autofocus: true,
                     controller: promptController,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (value) async {

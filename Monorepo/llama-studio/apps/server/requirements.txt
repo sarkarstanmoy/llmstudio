@@ -6,3 +6,4 @@ python-multipart
 llama-cpp-python
 llama-index
 websockets
+psutil

@@ -5,7 +5,7 @@ import 'color_scheme.dart';
 
 class CustomTheme {
   ThemeData buildLightTheme() {
-    var baseTheme = ThemeData(useMaterial3: true, colorScheme: lightColorScheme);
+    var baseTheme = ThemeData(useMaterial3: true, colorSchemeSeed: Colors.purple,brightness: Brightness.light);
 
     return baseTheme.copyWith(
       textTheme: GoogleFonts.poppinsTextTheme(baseTheme.textTheme),
@@ -13,7 +13,7 @@ class CustomTheme {
   }
 
   ThemeData buildDarkTheme() {
-    var baseTheme = ThemeData(useMaterial3: true,colorScheme: darkColorScheme);
+    var baseTheme = ThemeData(useMaterial3: true,colorSchemeSeed: Colors.purple,brightness: Brightness.dark);
 
     return baseTheme.copyWith(
       textTheme: GoogleFonts.poppinsTextTheme(baseTheme.textTheme),

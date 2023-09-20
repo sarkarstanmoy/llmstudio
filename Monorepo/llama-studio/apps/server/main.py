@@ -6,9 +6,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from llama_index.llms import LlamaCPP
 from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
 from pydantic import BaseModel
+import psutil
+
+class SystemStats(BaseModel):
+    ram_total: str
+    ram_used:str
+    ram_available: str
+    cpu_percentage: str
+    disk_available:str
+    disk_percentage : str
+    disk_used : str
 
 class Prompt(BaseModel):
-    request: str
+    request:str
 
 app = FastAPI()
 
@@ -73,6 +83,19 @@ def read_stream_async(prompt):
 def read_sync(prompt:Prompt):
     return llm.complete(prompt.request).text; 
 
-@app.post("/chat/stop")
-def stop():
-    return llm.complete("stop")
+@app.get("/systemstats")
+def get_system_stats():
+    try:
+        ram_info = psutil.virtual_memory()
+        cpu_percent = psutil.cpu_percent()
+        disk_info = psutil.disk_usage("/")
+        return SystemStats(ram_available=f"{ram_info.free / 1024 / 1024 / 1024:.2f} GB",
+                           ram_total=f"{ram_info.total / 1024 / 1024 / 1024:.2f} GB",
+                           ram_used=f"{ram_info.used / 1024 / 1024 / 1024:.2f} GB",
+                           cpu_percentage=f"{cpu_percent}",
+                           disk_available=f"{disk_info.free / 1024 / 1024 / 1024:.2f} GB",
+                           disk_percentage=f"{disk_info.percent / 1024 / 1024 / 1024:.2f} GB",
+                           disk_used=f"{disk_info.used / 1024 / 1024 / 1024:.2f} GB")
+        
+    except FileNotFoundError:
+        print("Either Ram, CPU or disk info not available on this system")
