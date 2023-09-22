@@ -7,6 +7,7 @@ from llama_index.llms import LlamaCPP
 from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
 from pydantic import BaseModel
 import psutil
+import uvicorn
 
 class SystemStats(BaseModel):
     ram_total: str
@@ -88,6 +89,7 @@ def get_system_stats():
     try:
         ram_info = psutil.virtual_memory()
         cpu_percent = psutil.cpu_percent()
+    
         disk_info = psutil.disk_usage("/")
         return SystemStats(ram_available=f"{ram_info.free / 1024 / 1024 / 1024:.2f} GB",
                            ram_total=f"{ram_info.total / 1024 / 1024 / 1024:.2f} GB",
@@ -99,3 +101,7 @@ def get_system_stats():
         
     except FileNotFoundError:
         print("Either Ram, CPU or disk info not available on this system")
+
+
+if __name__=="__main__":
+    uvicorn.run("main:app",host='0.0.0.0', port=4557, reload=True)

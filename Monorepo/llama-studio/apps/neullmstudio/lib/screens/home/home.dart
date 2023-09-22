@@ -6,6 +6,8 @@ import 'package:neu_llm_studio/common/common.dart';
 import 'package:neu_llm_studio/screens/offline/offline.dart';
 import 'package:neu_llm_studio/screens/test/test.dart';
 
+import '../settings/settings.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -55,7 +57,10 @@ class _HomeState extends State<Home> {
           return const Offline();
         } else if (_selectedTab ==1){
           return const Test();
-        } else {
+        } else if (_selectedTab ==2) {
+          return const Settings();
+        }
+        else {
           return Container();
         }
       },

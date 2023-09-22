@@ -21,8 +21,7 @@ class SystemStat {
   late String disk_available;
   late String disk_percentage;
   late String disk_used;
-
-
+  
   SystemStat({required this.ram_available,required this.ram_total,required this.ram_used,
     required this.cpu_percentage,required this.disk_available,required this.disk_percentage,
     required this.disk_used});
@@ -42,18 +41,19 @@ class SystemStat {
 }
 
 class LlamaProvider {
+  final baseUrl="http://127.0.0.1:8000";
   Future<Data> getResponse(String prompt) async {
     var request = {"request": prompt};
-    var url = "http://127.0.0.1:8000/prompt";
+    var url = "$baseUrl/prompt";
     if (GetPlatform.isMobile) {
-      url = "http://10.0.2.2:8000/prompt";
+      url = "$baseUrl/prompt";
     }
     var response = await Dio().post(url, data: jsonEncode(request));
     return Data(response: response.data);
   }
 
   Future<SystemStat> getSystemData() async {
-    var url = "http://127.0.0.1:8000/systemstats";
+    var url = "$baseUrl/systemstats";
     var response = await Dio().get(url);
     return SystemStat.fromJson(response.data);
   }

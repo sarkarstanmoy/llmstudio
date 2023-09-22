@@ -90,10 +90,15 @@ class _OfflineState extends State<Offline> {
                           children: [
                             Text(
                               "Llama-7b-gguf",
-                              style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .displaySmall
+                                  ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
                             ),
                             Text("Model Used"),
-
                           ],
                         ),
                       ),
@@ -126,7 +131,7 @@ class _OfflineState extends State<Offline> {
                                           .colorScheme
                                           .primary),
                             ),
-                            Text("Disk Usage"),
+                            Text("Disk Usages"),
                           ],
                         )),
                       ),
@@ -136,7 +141,7 @@ class _OfflineState extends State<Offline> {
               ),
             ]);
           } else {
-            return const CircularProgressIndicator();
+            return Center(child: const CircularProgressIndicator());
           }
         },
         future: LlamaProvider().getSystemData(),

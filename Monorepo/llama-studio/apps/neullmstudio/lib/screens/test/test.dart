@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:neu_llm_studio/common/common.dart';
+import 'package:neu_llm_studio/screens/test/instruction.dart';
 
 import '../../common/prompt_model.dart';
 import '../../infrastructure/llama_provider.dart';
@@ -24,8 +25,7 @@ class _TestState extends State<Test> {
     onKey: (FocusNode node, RawKeyEvent evt) {
       if (!evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
         return KeyEventResult.handled;
-      }
-      else {
+      } else {
         return KeyEventResult.ignored;
       }
     },
@@ -33,52 +33,55 @@ class _TestState extends State<Test> {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
     final promptController = TextEditingController();
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-                child: ListView.separated(
-                    itemBuilder: (BuildContext context, int index) {
-                      return Column(
-                        children: [
-                          RichText(
-                              text: TextSpan(children: [
-                            TextSpan(
-                                text: "Prompt: ",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary)),
-                            TextSpan(
-                                text: prompts[index].question,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary))
-                          ])),
-                          AnimatedTextKit(
-                            isRepeatingAnimation: false,
-                            stopPauseOnTap: true,
-                            animatedTexts: [
-                              TyperAnimatedText(prompts[index].answer,textStyle: TextStyle(color: Colors.green))
-                            ],
-                          )
-                        ],
-                      );
-                    },
-                    itemCount: prompts.length,
-                    separatorBuilder: (BuildContext context, int index) {
-                      return const Divider();
-                    })),
+           prompts.isEmpty ?  const Expanded(child: Instruction()) : Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.separated(
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            RichText(
+                                text: TextSpan(children: [
+                              TextSpan(
+                                  text: "Prompt: ",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary)),
+                              TextSpan(
+                                  text: prompts[index].question,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary))
+                            ])),
+                            AnimatedTextKit(
+                              isRepeatingAnimation: false,
+                              stopPauseOnTap: true,
+                              animatedTexts: [
+                                TyperAnimatedText(prompts[index].answer,
+                                    textStyle: TextStyle(color: Colors.green))
+                              ],
+                            )
+                          ],
+                        );
+                      },
+                      itemCount: prompts.length,
+                      separatorBuilder: (BuildContext context, int index) {
+                        return const Divider();
+                      }),
+                )),
             showLoading ? CircularProgressIndicator() : Container(),
             Row(
               children: [
@@ -94,6 +97,7 @@ class _TestState extends State<Test> {
                     child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
+                    maxLength: 2000,
                     focusNode: _focusNode,
                     autofocus: true,
                     controller: promptController,
@@ -129,6 +133,10 @@ class _TestState extends State<Test> {
                 )),
               ],
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0,0,0,20),
+              child:  Text("ENTER to send",style: Theme.of(context).textTheme.bodySmall,),
+            )
           ],
         ),
       ),
