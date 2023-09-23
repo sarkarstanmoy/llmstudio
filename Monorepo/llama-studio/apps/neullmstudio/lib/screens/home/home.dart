@@ -3,6 +3,7 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:neu_llm_studio/common/common.dart';
+import 'package:neu_llm_studio/screens/localserver/local-server.dart';
 import 'package:neu_llm_studio/screens/offline/offline.dart';
 import 'package:neu_llm_studio/screens/test/test.dart';
 
@@ -22,45 +23,76 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
       useDrawer: false,
-        appBar: Common().CustomAppBar(),
-        appBarBreakpoint: Breakpoints.small,
-        selectedIndex: _selectedTab,
-        onSelectedIndexChange: (int index) {
-          setState(() {
-            _selectedTab = index;
-          });
-        },
-
-        leadingExtendedNavRail: Text("NeuLLMStudio"),
-        leadingUnextendedNavRail: Text("NeuLLM"),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.offline_share_outlined),
-            selectedIcon: InkWell(child: const Icon(Icons.offline_share,),onTap: (){Get.to(const Offline());},),
-            label: 'Performance',
+      appBar: Common().CustomAppBar(),
+      appBarBreakpoint: Breakpoints.small,
+      selectedIndex: _selectedTab,
+      onSelectedIndexChange: (int index) {
+        setState(() {
+          _selectedTab = index;
+        });
+      },
+      leadingExtendedNavRail: Text("NeuLLMStudio"),
+      leadingUnextendedNavRail: Text("NeuLLM"),
+      destinations: [
+        NavigationDestination(
+          icon: const Icon(Icons.offline_share_outlined),
+          selectedIcon: InkWell(
+            child: const Icon(
+              Icons.offline_share,
+            ),
+            onTap: () {
+              Get.to(const Offline());
+            },
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.electric_bolt_outlined,),
-            selectedIcon: InkWell(child: const Icon(Icons.electric_bolt),onTap: (){ Get.to(const Test());},),
-            label: 'Test',
+          label: 'Performance',
+        ),
+        NavigationDestination(
+          icon: const Icon(
+            Icons.electric_bolt_outlined,
           ),
-
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: InkWell(child: const Icon(Icons.settings,),onTap: (){Get.to(const Offline());},),
-            label: 'Settings',
+          selectedIcon: InkWell(
+            child: const Icon(Icons.electric_bolt),
+            onTap: () {
+              Get.to(const Test());
+            },
           ),
-        ],
-
+          label: 'Test',
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.electrical_services_sharp),
+          selectedIcon: InkWell(
+            child: const Icon(
+              Icons.settings,
+            ),
+            onTap: () {
+              Get.to(const LocalServer());
+            },
+          ),
+          label: 'Local Server',
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: InkWell(
+            child: const Icon(
+              Icons.settings,
+            ),
+            onTap: () {
+              Get.to(const Offline());
+            },
+          ),
+          label: 'Settings',
+        ),
+      ],
       body: (context) {
-        if(_selectedTab ==0){
+        if (_selectedTab == 0) {
           return const Offline();
-        } else if (_selectedTab ==1){
+        } else if (_selectedTab == 1) {
           return const Test();
-        } else if (_selectedTab ==2) {
+        } else if (_selectedTab == 2) {
+          return const LocalServer();
+        } else if (_selectedTab == 3) {
           return const Settings();
-        }
-        else {
+        } else {
           return Container();
         }
       },
