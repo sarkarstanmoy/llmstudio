@@ -59,10 +59,10 @@ class _HomeState extends State<Home> {
           label: 'Test',
         ),
         NavigationDestination(
-          icon: const Icon(Icons.electrical_services_sharp),
+          icon: const Icon(Icons.electrical_services_outlined),
           selectedIcon: InkWell(
             child: const Icon(
-              Icons.settings,
+              Icons.electrical_services,
             ),
             onTap: () {
               Get.to(const LocalServer());

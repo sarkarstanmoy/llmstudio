@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../../common/globals.dart' as globals;
 
 List<String> list = <String>['Select Model', 'Llama-7b', 'Falcon-7b', 'MPT'];
 
@@ -14,21 +15,21 @@ class LocalServer extends StatefulWidget {
 
 class _LocalServerState extends State<LocalServer> {
   String dropdownValue = list.first;
-  late Process process;
+  //late Process process;
   late String status = "Server status \n";
 
   startServer() async {
-    process = await Process.start(
+    globals.serverProcess = await Process.start(
         'uvicorn', ['main:app', '--port=8000', '--reload'],
         workingDirectory:
             "C://Learnings//LLM//LLMStudio//llmstudio//Monorepo//llama-studio//apps//server",
         runInShell: true);
-    process.stdout.transform(utf8.decoder).forEach((s) {
+    globals.serverProcess!.stdout.transform(utf8.decoder).forEach((s) {
       setState(() {
         status = status + s + "\n";
       });
     });
-    process.stderr.transform(utf8.decoder).forEach((s) {
+    globals.serverProcess!.stderr.transform(utf8.decoder).forEach((s) {
       setState(() {
         status = status + s + "\n";
       });
@@ -36,7 +37,8 @@ class _LocalServerState extends State<LocalServer> {
   }
 
   stopServer() {
-    if (process.kill()) {
+    if (globals.serverProcess!.kill()) {
+      globals.serverProcess = null;
       setState(() {
         status = status + "Stopped successfully" + "\n";
       });
@@ -150,19 +152,22 @@ class _LocalServerState extends State<LocalServer> {
           ],
         ),
       ),
-      Row(
-        children: [
-          ElevatedButton(
-              onPressed: () {
-                startServer();
-              },
-              child: const Text("START")),
-          ElevatedButton(
-              onPressed: () {
-                stopServer();
-              },
-              child: const Text("STOP"))
-        ],
+      Padding(
+        padding: const EdgeInsets.fromLTRB(100, 10, 0, 0),
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  startServer();
+                },
+                child: const Text("START")),
+            ElevatedButton(
+                onPressed: () {
+                  stopServer();
+                },
+                child: const Text("STOP"))
+          ],
+        ),
       ),
       const Divider(),
       Expanded(

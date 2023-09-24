@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:neu_llm_studio/infrastructure/llama_provider.dart';
+import 'package:neu_llm_studio/screens/offline/instruction.dart';
 
-import '../../common/common.dart';
+import '../../common/globals.dart' as globals;
+
 
 class Offline extends StatefulWidget {
   const Offline({super.key});
@@ -17,7 +19,10 @@ class _OfflineState extends State<Offline> {
   @override
   void initState() {
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      setState(() {});
+      if(globals.serverProcess != null){
+        setState(() {});
+
+      }
     });
     super.initState();
   }
@@ -31,7 +36,7 @@ class _OfflineState extends State<Offline> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
+      body: globals.serverProcess == null ? Instruction() :  FutureBuilder(
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Column(children: [
