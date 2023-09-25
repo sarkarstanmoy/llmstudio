@@ -98,8 +98,6 @@ class _TestState extends State<Test> {
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
                     maxLength: 2000,
-                    focusNode: _focusNode,
-                    autofocus: true,
                     controller: promptController,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (value) async {

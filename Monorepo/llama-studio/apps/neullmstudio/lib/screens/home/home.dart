@@ -4,8 +4,11 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:neu_llm_studio/common/common.dart';
 import 'package:neu_llm_studio/screens/localserver/local-server.dart';
+import 'package:neu_llm_studio/screens/localserver/localserver-web.dart';
 import 'package:neu_llm_studio/screens/offline/offline.dart';
 import 'package:neu_llm_studio/screens/test/test.dart';
+import '../../common/globals.dart' as globals;
+
 
 import '../settings/settings.dart';
 
@@ -58,18 +61,19 @@ class _HomeState extends State<Home> {
           ),
           label: 'Test',
         ),
-        NavigationDestination(
-          icon: const Icon(Icons.electrical_services_outlined),
-          selectedIcon: InkWell(
-            child: const Icon(
-              Icons.electrical_services,
+        GetPlatform.isWindows ?
+          NavigationDestination(
+            icon: const Icon(Icons.electrical_services_outlined),
+            selectedIcon: InkWell(
+              child: const Icon(
+                Icons.electrical_services,
+              ),
+              onTap: () {
+                Get.to(const LocalServer());
+              },
             ),
-            onTap: () {
-              Get.to(const LocalServer());
-            },
-          ),
-          label: 'Local Server',
-        ),
+            label: 'Local Server',
+          ) : NavigationDestination(icon: const Icon(Icons.electrical_services_outlined), label: 'Server Info',),
         NavigationDestination(
           icon: const Icon(Icons.settings_outlined),
           selectedIcon: InkWell(
@@ -89,7 +93,7 @@ class _HomeState extends State<Home> {
         } else if (_selectedTab == 1) {
           return const Test();
         } else if (_selectedTab == 2) {
-          return const LocalServer();
+         return globals.IsWeb ?  const LocalServerWeb() :  const LocalServer();
         } else if (_selectedTab == 3) {
           return const Settings();
         } else {

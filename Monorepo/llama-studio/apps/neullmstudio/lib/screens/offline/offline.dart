@@ -36,7 +36,7 @@ class _OfflineState extends State<Offline> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: globals.serverProcess == null ? Instruction() :  FutureBuilder(
+      body: !globals.IsWeb && globals.serverProcess == null ? Instruction() :  FutureBuilder(
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Column(children: [
