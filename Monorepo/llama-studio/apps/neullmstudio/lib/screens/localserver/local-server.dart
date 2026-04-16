@@ -26,12 +26,12 @@ class _LocalServerState extends State<LocalServer> {
         runInShell: true);
     globals.serverProcess!.stdout.transform(utf8.decoder).forEach((s) {
       setState(() {
-        status = status + s + "\n";
+        status = '$status$s\n';
       });
     });
     globals.serverProcess!.stderr.transform(utf8.decoder).forEach((s) {
       setState(() {
-        status = status + s + "\n";
+        status = '$status$s\n';
       });
     });
   }
@@ -40,7 +40,7 @@ class _LocalServerState extends State<LocalServer> {
     if (globals.serverProcess!.kill()) {
       globals.serverProcess = null;
       setState(() {
-        status = status + "Stopped successfully" + "\n";
+        status = '${status}Stopped successfully\n';
       });
     }
   }
@@ -129,9 +129,9 @@ class _LocalServerState extends State<LocalServer> {
 
              Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0,20,0,0),
-                  child: const Text("Example client request "),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0,20,0,0),
+                  child: Text("Example client request "),
                 ),
                 Text("Run this code in your terminal",style: Theme.of(context).textTheme.bodySmall,),
                 Padding(
@@ -142,7 +142,7 @@ class _LocalServerState extends State<LocalServer> {
                     decoration: BoxDecoration(
                       border: Border.all(width: 1,color: Theme.of(context).colorScheme.primary)
                     ),
-                    child: Text(""),
+                    child: const Text(""),
                   ),
                 )
 

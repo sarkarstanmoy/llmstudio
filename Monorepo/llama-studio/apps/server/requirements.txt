@@ -3,7 +3,7 @@ uvicorn
 gunicorn
 jinja2
 python-multipart
-llama-cpp-python
-llama-index
+llama-cpp-python[server]
+huggingface_hub
 websockets
 psutil

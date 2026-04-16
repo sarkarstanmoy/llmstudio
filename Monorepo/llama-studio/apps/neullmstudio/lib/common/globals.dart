@@ -1,7 +1,7 @@
- import 'dart:io';
-
-import 'package:get/get_utils/src/platform/platform.dart';
+import 'dart:io';
+import 'package:get/get.dart';
 
 Process? serverProcess;
- bool IsWeb = GetPlatform.isWindows && GetPlatform.isWeb;
 
+/// True when running inside a web browser.
+bool get isWeb => GetPlatform.isWeb;

@@ -1,62 +1,96 @@
 import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 
-class Data {
-  late String response;
-  Data({required this.response});
-  factory Data.fromJson(Map<String, dynamic> data) {
-    final response = data['response'] as String;
-    return Data(response: response);
-  }
+/// Global server configuration — can be changed from Settings at runtime.
+class AppConfig {
+  static String baseUrl = 'http://127.0.0.1:4557';
+}
+
+class HealthStatus {
+  final bool ok;
+  final bool modelLoaded;
+
+  const HealthStatus({required this.ok, required this.modelLoaded});
+
+  factory HealthStatus.fromJson(Map<String, dynamic> data) => HealthStatus(
+        ok: data['status'] == 'ok',
+        modelLoaded: data['model_loaded'] as bool? ?? false,
+      );
 }
 
 class SystemStat {
-  late String ram_available;
-  late String ram_total;
-  late String ram_used;
-  late String cpu_percentage;
-  late String disk_available;
-  late String disk_percentage;
-  late String disk_used;
-  
-  SystemStat({required this.ram_available,required this.ram_total,required this.ram_used,
-    required this.cpu_percentage,required this.disk_available,required this.disk_percentage,
-    required this.disk_used});
-  factory SystemStat.fromJson(Map<String, dynamic> data) {
-    final ramAvailable = data['ram_available'] as String;
-    final ramTotal = data['ram_total'] as String;
-    final ramUsed = data['ram_used'] as String;
-    final cpuPercentage = data['cpu_percentage'] as String;
-    final diskAvailable = data['disk_available'] as String;
-    final diskPercentage = data['disk_percentage'] as String;
-    final diskUsed = data['disk_used'] as String;
+  final String ramAvailable;
+  final String ramTotal;
+  final String ramUsed;
+  final String cpuPercentage;
+  final String diskAvailable;
+  final String diskTotal;
+  final String diskPercentage;
+  final String diskUsed;
 
-    return SystemStat(ram_available: ramAvailable,ram_total:ramTotal,ram_used:ramUsed,
-        cpu_percentage:cpuPercentage,disk_available:diskAvailable,disk_percentage:diskPercentage,
-        disk_used:diskUsed);
-  }
+  const SystemStat({
+    required this.ramAvailable,
+    required this.ramTotal,
+    required this.ramUsed,
+    required this.cpuPercentage,
+    required this.diskAvailable,
+    required this.diskTotal,
+    required this.diskPercentage,
+    required this.diskUsed,
+  });
+
+  factory SystemStat.fromJson(Map<String, dynamic> data) => SystemStat(
+        ramAvailable: data['ram_available'] as String,
+        ramTotal: data['ram_total'] as String,
+        ramUsed: data['ram_used'] as String,
+        cpuPercentage: data['cpu_percentage'] as String,
+        diskAvailable: data['disk_available'] as String,
+        diskTotal: data['disk_total'] as String? ?? '0 GB',
+        diskPercentage: data['disk_percentage'] as String,
+        diskUsed: data['disk_used'] as String,
+      );
+
+  // ── Computed helpers ──────────────────────────────────────────────────────
+
+  double get cpuValue => double.tryParse(cpuPercentage) ?? 0.0;
+
+  double get ramUsedGb => _parseGb(ramUsed);
+  double get ramTotalGb => _parseGb(ramTotal);
+  double get ramPercent => ramTotalGb > 0 ? (ramUsedGb / ramTotalGb).clamp(0.0, 1.0) : 0.0;
+
+  double get diskUsedGb => _parseGb(diskUsed);
+  double get diskTotalGb => _parseGb(diskTotal);
+  double get diskPercent => diskTotalGb > 0 ? (diskUsedGb / diskTotalGb).clamp(0.0, 1.0) : 0.0;
+
+  double _parseGb(String s) => double.tryParse(s.replaceAll(' GB', '').trim()) ?? 0.0;
 }
 
 class LlamaProvider {
-  final baseUrl="http://127.0.0.1:8000";
-  Future<Data> getResponse(String prompt) async {
-    var request = {"request": prompt};
-    var url = "$baseUrl/prompt";
-    if (GetPlatform.isMobile) {
-      url = "$baseUrl/prompt";
+  static final _dio = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 120),
+  ));
+
+  Future<HealthStatus?> getHealth() async {
+    try {
+      final res = await _dio.get('${AppConfig.baseUrl}/health');
+      return HealthStatus.fromJson(res.data as Map<String, dynamic>);
+    } catch (_) {
+      return null;
     }
-    var response = await Dio().post(url, data: jsonEncode(request));
-    return Data(response: response.data);
+  }
+
+  Future<String> getResponse(String prompt) async {
+    final res = await _dio.post(
+      '${AppConfig.baseUrl}/prompt/',
+      data: jsonEncode({'request': prompt}),
+      options: Options(headers: {'Content-Type': 'application/json'}),
+    );
+    return res.data as String;
   }
 
   Future<SystemStat> getSystemData() async {
-    var url = "$baseUrl/systemstats";
-    var response = await Dio().get(url);
-    return SystemStat.fromJson(response.data);
+    final res = await _dio.get('${AppConfig.baseUrl}/systemstats');
+    return SystemStat.fromJson(res.data as Map<String, dynamic>);
   }
-
-
 }

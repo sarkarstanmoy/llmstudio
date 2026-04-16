@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Client application for LLM",
   "keywords": [
-    "neudesic",
     "ios",
     "android",
     "flutter",

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'color_scheme.dart';
-
 class CustomTheme {
   ThemeData buildLightTheme() {
     var baseTheme = ThemeData(
@@ -23,8 +21,8 @@ class CustomTheme {
 
     return baseTheme.copyWith(
       textTheme: GoogleFonts.poppinsTextTheme(baseTheme.textTheme).copyWith(
-        headlineSmall: TextStyle(color: Colors.white54),
-        bodySmall: TextStyle(color: Colors.white54)
+        headlineSmall: const TextStyle(color: Colors.white54),
+        bodySmall: const TextStyle(color: Colors.white54),
       ),
     );
   }

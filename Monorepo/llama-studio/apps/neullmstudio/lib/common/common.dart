@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../themes/custom_theme.dart';
 
 class Common {
-  PreferredSizeWidget CustomAppBar(){
+  PreferredSizeWidget customAppBar(){
     return AppBar(title: const Text('NeuLLMStudio'), elevation: 10, actions: [
       IconButton(onPressed: (){
         Get.changeTheme(Get.isDarkMode? CustomTheme().buildLightTheme() : CustomTheme().buildDarkTheme());

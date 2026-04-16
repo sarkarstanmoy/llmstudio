@@ -11,7 +11,7 @@ class LocalServerWeb extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Local Server",style: Theme.of(context).textTheme.headlineSmall),
-          SizedBox(height: 30,),
+          const SizedBox(height: 30),
           Text("* Local server will work on windows version",style: Theme.of(context).textTheme.bodySmall,textAlign: TextAlign.left),
 
         ],

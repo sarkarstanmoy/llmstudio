@@ -9,10 +9,10 @@
   "homepage": "",
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "uvicorn main:app --reload",
+    "dev": ".venv/bin/uvicorn main:app --host 127.0.0.1 --port 4557 --reload",
     "build": "",
     "lint": "echo TODO",
-    "test": "test lib"
+    "test": "echo No tests configured"
   },
   "devDependencies": {},
   "private": true

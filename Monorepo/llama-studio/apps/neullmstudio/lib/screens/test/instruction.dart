@@ -11,7 +11,7 @@ class Instruction extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Chat with Large Language Model",style: Theme.of(context).textTheme.headlineSmall),
-          SizedBox(height: 30,),
+          const SizedBox(height: 30),
           Text("* Chat with model using send",style: Theme.of(context).textTheme.bodySmall,textAlign: TextAlign.left),
           Text("* Remove all the chat history using Refresh icon",style: Theme.of(context).textTheme.bodySmall,textAlign: TextAlign.left),
           Text("* Send icons is for smaller devices. Use ENTER to send message",style: Theme.of(context).textTheme.bodySmall,textAlign: TextAlign.left),

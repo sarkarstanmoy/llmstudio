@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:neu_llm_studio/screens/home/home.dart';
-import 'package:neu_llm_studio/themes/color_scheme.dart';
 import 'package:neu_llm_studio/themes/custom_theme.dart';
 
 void main() {
@@ -23,9 +21,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Flutter Demo',
       theme: CustomTheme().buildLightTheme(),
-      darkTheme: CustomTheme().buildDarkTheme().copyWith(navigationRailTheme: NavigationRailThemeData(
+      darkTheme: CustomTheme().buildDarkTheme().copyWith(navigationRailTheme: const NavigationRailThemeData(
         elevation: 10,
-        groupAlignment: 0.0
+        groupAlignment: 0.0,
       )),
       home: const Home(),
       debugShowCheckedModeBanner: false,
