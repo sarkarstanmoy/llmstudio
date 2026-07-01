@@ -182,6 +182,113 @@ docker push neullmstudio.azurecr.io/llm/llama-7b-ggml-api
 
 ---
 
+## Raspberry Pi
+
+### Plan 1 — Self-hosted server behind Nginx + Certbot (HTTPS)
+
+Run the FastAPI + Code Llama backend on a Raspberry Pi and expose it to the
+internet over HTTPS, with Nginx as a reverse proxy and Certbot managing a free
+Let's Encrypt certificate.
+
+> **Hardware:** Use a **Raspberry Pi 4/5 with 8 GB RAM** (64-bit OS). The
+> CodeLlama-7B Q2_K model needs ~3.9 GB on disk and several GB of RAM to load;
+> inference is CPU-only and slow on a Pi, so keep it to short prompts.
+
+#### 1 — Prepare the Pi
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3-venv python3-pip build-essential cmake git nginx
+```
+
+#### 2 — Run the backend
+
+```bash
+git clone https://github.com/sarkarstanmoy/llmstudio.git
+cd llmstudio/Monorepo/llama-studio/apps/server
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Bind to localhost only — Nginx will handle the public traffic
+uvicorn main:app --host 127.0.0.1 --port 4557
+```
+
+Run it as a background service so it survives reboots and logout with
+`/etc/systemd/system/llmstudio.service`:
+
+```ini
+[Unit]
+Description=LLM Studio server
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/llmstudio/Monorepo/llama-studio/apps/server
+ExecStart=/home/pi/llmstudio/Monorepo/llama-studio/apps/server/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 4557
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now llmstudio
+```
+
+#### 3 — Configure Nginx as a reverse proxy
+
+Point a domain (e.g. `llm.example.com`) at your Pi's public IP first, then create
+`/etc/nginx/sites-available/llmstudio`:
+
+```nginx
+server {
+    listen 80;
+    server_name llm.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:4557;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Required for the /chat WebSocket and SSE streaming endpoints
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+    }
+}
+```
+
+```bash
+sudo ln -s /etc/nginx/sites-available/llmstudio /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+#### 4 — Enable HTTPS with Certbot
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d llm.example.com
+```
+
+Certbot rewrites the Nginx config to serve HTTPS on port 443 and auto-renews the
+certificate (test renewal with `sudo certbot renew --dry-run`).
+
+> **Router/firewall:** forward ports **80** and **443** to the Pi, and tighten
+> the `origins` CORS list in `main.py` to your app's domain before exposing the
+> server publicly.
+
+The backend is now reachable at `https://llm.example.com` — set this as the base
+URL in the Flutter app's **Settings** screen.
+
+---
+
 ## License
 
 UNLICENSED — private project.
