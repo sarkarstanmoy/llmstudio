@@ -8,7 +8,7 @@ import psutil
 import uvicorn
 
 MODEL_REPO = "TheBloke/CodeLlama-7B-Instruct-GGUF"
-MODEL_FILE = "codellama-7b-instruct.Q2_K.gguf"
+MODEL_FILE = "codellama-7b-instruct.Q4_K_M.gguf"
 
 # Loaded lazily on first inference request so the server starts immediately.
 _llm: Optional[Llama] = None
@@ -26,6 +26,11 @@ def get_llm() -> Llama:
         )
         print("Model loaded.")
     return _llm
+
+
+def _format_instruction(prompt: str) -> str:
+    """Wrap a user prompt in CodeLlama's instruction template for better results."""
+    return f"[INST] {prompt} [/INST]"
 
 
 class SystemStats(BaseModel):
@@ -61,7 +66,8 @@ def health():
 
 async def llm_stream(prompt: str):
     llm = get_llm()
-    for chunk in llm(prompt, max_tokens=256, stream=True):
+    instr = _format_instruction(prompt)
+    for chunk in llm(instr, max_tokens=512, temperature=0.0, top_p=0.95, stream=True):
         token = chunk["choices"][0]["text"]
         if token:
             print(token, end="", flush=True)
@@ -74,7 +80,8 @@ async def websocket_chat(websocket: WebSocket):
     llm = get_llm()
     while True:
         prompt = await websocket.receive_text()
-        for chunk in llm(prompt, max_tokens=256, stream=True):
+        instr = _format_instruction(prompt)
+        for chunk in llm(instr, max_tokens=512, temperature=0.0, top_p=0.95, stream=True):
             token = chunk["choices"][0]["text"]
             if token:
                 await websocket.send_text(token)
@@ -87,7 +94,8 @@ def stream_prompt(prompt: str):
 
 @app.post("/prompt/")
 def sync_prompt(prompt: Prompt):
-    result = get_llm()(prompt.request, max_tokens=256)
+    instr = _format_instruction(prompt.request)
+    result = get_llm()(instr, max_tokens=512, temperature=0.0, top_p=0.95)
     return result["choices"][0]["text"]
 
 
