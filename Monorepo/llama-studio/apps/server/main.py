@@ -7,6 +7,16 @@ from typing import Optional
 import psutil
 import uvicorn
 
+try:
+    from diffusers import ZImagePipeline
+except ImportError:  # pragma: no cover - optional dependency
+    ZImagePipeline = None
+
+try:
+    import torch
+except ImportError:  # pragma: no cover - optional dependency
+    torch = None
+
 MODEL_REPO = "TheBloke/CodeLlama-7B-Instruct-GGUF"
 MODEL_FILE = "codellama-7b-instruct.Q4_K_M.gguf"
 
@@ -113,6 +123,41 @@ def get_system_stats():
         disk_available=f"{disk.free / 1024**3:.2f} GB",
         disk_percentage=f"{disk.percent:.1f}%",
     )
+@app.get("/image/prompt/{prompt}")
+def image_generator(prompt: str):
+    if ZImagePipeline is None or torch is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Image generation dependencies are not installed. Install diffusers and torch to use this endpoint.",
+        )
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    torch_dtype = torch.bfloat16 if device == "cuda" else torch.float32
+
+    model_id = "Tongyi-MAI/Z-Image-Turbo"
+    pipe = ZImagePipeline.from_pretrained(
+        model_id,
+        torch_dtype=torch_dtype,
+        low_cpu_mem_usage=False,
+    )
+
+    pipe.to(device)
+
+    negative_prompt = "blurry, low quality, distorted"
+
+    image = pipe(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
+        height=1024,
+        width=1024,
+        num_inference_steps=9,
+        guidance_scale=0.0,
+        generator=torch.Generator(device=device).manual_seed(42),
+    ).images[0]
+
+    # 5. Save the generated asset locally
+    image.save("z_image_output.png")
+    print("Image successfully generated and saved to 'z_image_output.png'!")
 
 
 if __name__ == "__main__":

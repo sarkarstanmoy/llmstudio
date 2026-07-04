@@ -7,3 +7,6 @@ llama-cpp-python[server]
 huggingface_hub
 websockets
 psutil
+diffusers
+torch
+transformers
